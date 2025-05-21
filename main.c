@@ -7,6 +7,8 @@
 #define S_RECT_HEGIHT    4
 #define S_RECT_WIDTH     4
 #define FOOD_SIZE        2
+#define S_RECT_START_X  (SCREEN_WIDTH/2) - (S_RECT_WIDTH/2);
+#define S_RECT_START_Y  (SCREEN_HEIGHT/2) - (S_RECT_HEGIHT/2);
 
 #define MEM_VRAM        0x06000000
 
@@ -51,6 +53,24 @@ void clear_previous(struct rect* s_rect){
     draw_rect(s_rect, 0x0000);
 }
 
+void reset_snake(struct rect* s_rect){
+    s_rect->x = S_RECT_START_X;
+    s_rect->y = S_RECT_START_Y;
+
+}
+
+void check_position(struct rect* s_rect){
+
+    int x = s_rect->x;
+    int y = s_rect->y;
+    int x_border = SCREEN_WIDTH - S_RECT_WIDTH;
+    int y_border = SCREEN_HEIGHT - S_RECT_HEGIHT;
+
+    if(x < 0 || x > x_border || y < 0 || y > y_border){
+        reset_snake(s_rect);
+    }
+}
+
 int main(void) {
 
     // Interrupt handlers
@@ -62,9 +82,12 @@ int main(void) {
     /* Set screen to mode 3 */
     SetMode( MODE_3 | BG2_ON );
 
+    int start_x = S_RECT_START_X;
+    int start_y = S_RECT_START_Y;
+
     struct rect s_rect = { 
-        .x = (SCREEN_WIDTH/2) - (S_RECT_WIDTH/2), 
-        .y = (SCREEN_HEIGHT/2) - (S_RECT_HEGIHT/2), 
+        .x = start_x, 
+        .y = start_y, 
         .width = S_RECT_WIDTH, 
         .height = S_RECT_HEGIHT,
         .color = 0x7FFF
@@ -107,6 +130,8 @@ int main(void) {
 
         if(axis == 2) s_rect.x += velocity;
         else s_rect.y += velocity;
+
+        check_position(&s_rect);
 
         draw_rect(&s_rect, s_rect.color);
 
